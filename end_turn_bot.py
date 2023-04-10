@@ -7,14 +7,12 @@ game_counter = 0
 current_turn = 0
 previous_turn = 0
 
-play_clicked = False
-matchmaking_started = False
-
 
 # FIND WHAT SCREEN WE'RE ON
 def locate_screen():
     attempts = 0
     while attempts < 3:
+        move_mouse_away()
         if play_button_visible():
             return "home"
         elif cancel_button_visible():
@@ -25,6 +23,8 @@ def locate_screen():
             return "end"
         elif next_button_visible():
             return "results"
+        elif season_pass_screen():
+            close_season_pass()
         attempts += 1
         if attempts != 3:
             time.sleep(1)
@@ -33,17 +33,16 @@ def locate_screen():
 
 # STARTS THE GAME
 def reset_loop():
-    global play_clicked
     global game_initialized
     global current_turn
     global current_screen
     global previous_turn
 
-    play_clicked = False
     game_initialized = False
     current_turn = 0
     current_screen = "home"
     previous_turn = 0
+    move_mouse_away()
 
 
 current_screen = locate_screen()
@@ -55,17 +54,20 @@ else:
 print("Beginning program...")
 
 while 1:
-
     while current_screen == "home":
-        if not play_clicked:
+        current_screen = locate_screen()
+        if play_button_visible():
             print("Starting a new match!")
-            click_play_button()
-            play_clicked = True
+            time.sleep(0.5)
+            try:
+                click_play_button()
+            except:
+                current_screen = locate_screen()
             time.sleep(1)
-        else:
-            if cancel_button_visible():
-                print("Matchmaking started.")
-                current_screen = "matchmaking"
+        if cancel_button_visible():
+            print("Matchmaking started.")
+            current_screen = "matchmaking"
+            time.sleep(1)
 
     while current_screen == "matchmaking":
         if cancel_button_visible():
@@ -76,12 +78,18 @@ while 1:
             current_screen = "in game"
 
     if not game_initialized:
+        error_counter = 0
         while not retreat_button_visible():
             print("Game is still being setting up.")
-            time.sleep(10)
+            move_mouse_away()
+            time.sleep(1)
+            error_counter += 1
+            if error_counter > 9:
+                current_screen = locate_screen()
         print("Game has begun!")
         current_turn = 1
         game_initialized = True
+        time.sleep(5)
 
     while current_screen == "in game":
         turn_status = end_turn_button_text()
@@ -90,7 +98,12 @@ while 1:
             case "end turn":
                 print("Ending turn " + str(current_turn) + ".")
                 current_turn += 1
-                end_turn()
+                try:
+                    end_turn()
+                except:
+                    print("Hold on, something went wrong...")
+                    time.sleep(5)
+                    current_screen = locate_screen()
             case "playing":
                 print("Turn is currently being played.")
             case "waiting":
