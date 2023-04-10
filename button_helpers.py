@@ -1,5 +1,6 @@
 import pyautogui
 import random
+import time
 
 # FILE PATHS AND COORDINATES FOR BUTTONS
 # TODO: MAKE THIS DYNAMIC FOR ANY SCREEN DIMENSION/WINDOWED MODE
@@ -8,7 +9,7 @@ play_button_tuple = (840, 770, 220, 120)
 cancel_button = 'Buttons/cancel.png'
 cancel_button_tuple = (850, 920, 200, 100)
 retreat_button = 'Buttons/retreat.png'
-retreat_button_tuple = (590, 940, 130, 50)
+retreat_button_tuple = (590, 900, 130, 200)
 end_turn_text = 'Buttons/end turn.png'
 playing_text = 'Buttons/playing.png'
 waiting_text = 'Buttons/waiting.png'
@@ -17,6 +18,31 @@ collect_rewards_button = 'Buttons/collect rewards.png'
 collect_rewards_tuple = (1170, 930, 170, 70)
 next_button = 'Buttons/next.png'
 next_button_tuple = (1200, 950, 130, 70)
+close_button = 'Buttons/x.png'
+close_button_tuple = (900, 940, 100, 100)
+
+
+# MOVE THE MOUSE SAFELY OFF SCREEN
+def move_mouse_away():
+    x, y = random.randint(80, 450), random.randint(600, 700)
+    pyautogui.moveTo(x, y)
+    time.sleep(0.5)
+    pyautogui.click(x, y)
+
+
+# DETERMINES IF WE'RE ON THAT FUCKIGN SEASON PASS SCREEN
+def season_pass_screen():
+    if pyautogui.locateOnScreen(close_button, region=close_button_tuple, confidence=0.95) is not None:
+        return True
+    return False
+
+
+# CLOSE THE FUCKING SEASON PASS SCREEN
+def close_season_pass():
+    x, y = pyautogui.locateCenterOnScreen(close_button, region=close_button_tuple, confidence=0.95)
+    pyautogui.click(x, y)
+    time.sleep(0.5)
+    move_mouse_away()
 
 
 # DETERMINES IF PLAY BUTTON IS ON SCREEN
@@ -28,8 +54,12 @@ def play_button_visible():
 
 # CLICKS THE PLAY BUTTON
 def click_play_button():
-    x, y = pyautogui.locateCenterOnScreen(play_button, region=play_button_tuple, confidence=0.95)
-    pyautogui.click((x + random.randint(0, 15)), (y + random.randint(0, 15)))
+    x, y = pyautogui.locateCenterOnScreen(play_button, region=play_button_tuple, confidence=0.98)
+    pyautogui.click(x, y)
+    time.sleep(0.5)
+    # pyautogui.click((x + random.randint(0, 15)), (y + random.randint(0, 15)))
+    # MOVE THE MOUSE OFF THE BUTTON SO WE STOP GETTING INTO TROUBLE
+    move_mouse_away()
 
 
 # DETERMINES IF CANCEL BUTTON IS ON SCREEN
@@ -87,3 +117,4 @@ def next_button_visible():
 def click_next_button():
     x, y = pyautogui.locateCenterOnScreen(next_button, region=next_button_tuple, confidence=0.95)
     pyautogui.click((x + random.randint(0, 15)), (y + random.randint(0, 15)))
+    move_mouse_away()
